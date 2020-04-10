@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
             if (!::job.isInitialized){
                 initJob()
             }
+            job_progress.startJobOrCancel(job)
         }
     }
 
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             println("$job is aleady active. Cancelling...")
             resetJob()
         }else{
-            btn_start.text = "Cancel job #1"
+            btn_start.text = "Cancel job#1"
             // Mengikat Scope IO dengan job sehingga memiliki scope private pada IO
             CoroutineScope(Dispatchers.IO + job).launch {
                 println("coroutines $this is activiated with job $job")
@@ -55,7 +56,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetJob() {
-        TODO("Not yet implemented")
+        if (job.isActive || job.isCompleted){
+            job.cancel(CancellationException("Resetting job"))
+        }
+        initJob()
     }
 
     private fun initJob(){
@@ -76,7 +80,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        job_progress.min = PROGRESS_MIN
+        job_progress.progress = PROGRESS_MIN
         job_progress.max = PROGRESS_MAX
     }
 
