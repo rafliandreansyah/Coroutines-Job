@@ -2,6 +2,7 @@ package com.azhara.coroutines_job
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.ProgressBar
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
@@ -28,9 +29,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun ProgressBar.startJobOrCancel(job: Job){
+        if (this.progress > 0){
+            println("$job is aleady active. Cancelling...")
+            resetJob()
+        }else{
+            btn_start.text = "Cancel job #1"
+            // Mengikat Scope IO dengan job sehingga memiliki scope private pada IO
+            CoroutineScope(Dispatchers.IO + job).launch {
+                println("coroutines $this is activiated with job $job")
+
+                for (i in PROGRESS_MIN.. PROGRESS_MAX){
+                    delay((JOB_TIME / PROGRESS_MAX))
+                    this@startJobOrCancel.progress = i
+                }
+                updateJobCompleteText("Job is complete")
+            }
+        }
+    }
+
+    private fun updateJobCompleteText(text: String){
+        GlobalScope.launch(Dispatchers.Main){
+            tv_job_status.text = text
+        }
+    }
+
+    private fun resetJob() {
+        TODO("Not yet implemented")
+    }
+
     private fun initJob(){
         btn_start.text = "Start Job#1"
-        tv_job_status.text = ""
+        updateJobCompleteText("")
         job = Job()
 
         // fungsi spesial pada job dimana saat job berjalan dapat memberitahu aktifitas apapun seperti cancel job, memperbarui loading dll ataupun job selesai dijalankan
